@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Logisco</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <i class="fas fa-shield-alt"></i>
+      <h2>Admin Panel</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="admin-overview">
+        <i class="fas fa-chart-line"></i> Overview
+      </a>
+      <a href="#" class="nav-item" data-page="admin-shipments">
+        <i class="fas fa-box"></i> All Shipments
+      </a>
+      <a href="#" class="nav-item" data-page="admin-users">
+        <i class="fas fa-users"></i> Users
+      </a>
+      <a href="#" class="nav-item" data-page="admin-invoices">
+        <i class="fas fa-file-invoice-dollar"></i> Invoices
+      </a>
+      <a href="#" class="nav-item" data-page="admin-settings">
+        <i class="fas fa-cog"></i> Settings
+      </a>
+      <a href="#" class="nav-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="dashboard-header">
+      <h1 id="adminPageTitle">Admin Overview</h1>
+      <div class="user-info">
+        <span id="adminName">Administrator</span>
+        <i class="fas fa-user-shield"></i>
+      </div>
+    </header>
+
+    <div id="adminPageContent" class="page-content">
+      <!-- Admin Overview -->
+      <div id="admin-overview" class="page-section active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <i class="fas fa-box"></i>
+            <div class="stat-info">
+              <h3 id="adminTotalShipments">0</h3>
+              <p>Total Shipments</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <div class="stat-info">
+              <h3 id="adminTotalUsers">0</h3>
+              <p>Total Users</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-truck"></i>
+            <div class="stat-info">
+              <h3 id="adminActiveShipments">0</h3>
+              <p>Active Shipments</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-dollar-sign"></i>
+            <div class="stat-info">
+              <h3 id="adminTotalRevenue">$0</h3>
+              <p>Total Revenue</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <h2>Recent Activity</h2>
+          <div id="recentActivity" class="activity-list">
+            <!-- Activity items will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- All Shipments -->
+      <div id="admin-shipments" class="page-section">
+        <div class="page-header">
+          <h2>All Shipments</h2>
+          <div class="filters">
+            <select id="adminStatusFilter" onchange="adminFilterShipments()">
+              <option value="">All Status</option>
+              <option value="PENDING">Pending</option>
+              <option value="PICKED_UP">Picked Up</option>
+              <option value="IN_TRANSIT">In Transit</option>
+              <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+              <option value="DELIVERED">Delivered</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="adminShipmentsList" class="admin-table">
+          <!-- Shipments table will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Users Management -->
+      <div id="admin-users" class="page-section">
+        <div class="page-header">
+          <h2>Users Management</h2>
+          <button class="btn-primary" onclick="showAddUserModal()">
+            <i class="fas fa-user-plus"></i> Add User
+          </button>
+        </div>
+
+        <div id="adminUsersList" class="admin-table">
+          <!-- Users table will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Invoices -->
+      <div id="admin-invoices" class="page-section">
+        <h2>All Invoices</h2>
+        <div id="adminInvoicesList" class="admin-table">
+          <!-- Invoices table will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div id="admin-settings" class="page-section">
+        <h2>System Settings</h2>
+
+        <div class="settings-grid">
+          <div class="setting-card">
+            <h3>Email Notifications</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="emailNotifications" onchange="updateSetting('emailNotifications', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-card">
+            <h3>SMS Notifications</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="smsNotifications" onchange="updateSetting('smsNotifications', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-card">
+            <h3>Auto Invoice Generation</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="autoInvoice" onchange="updateSetting('autoInvoice', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-card">
+            <h3>Allow User Registration</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="userRegistration" onchange="updateSetting('userRegistration', this.checked)" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-card">
+            <h3>Track Without Login</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="publicTracking" onchange="updateSetting('publicTracking', this.checked)" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-card">
+            <h3>Maintenance Mode</h3>
+            <label class="toggle-switch">
+              <input type="checkbox" id="maintenanceMode" onchange="updateSetting('maintenanceMode', this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-form">
+          <h3>General Settings</h3>
+          <form id="generalSettingsForm">
+            <div class="form-group">
+              <label>Company Name</label>
+              <input type="text" id="companyName" value="Logisco">
+            </div>
+            <div class="form-group">
+              <label>Support Email</label>
+              <input type="email" id="supportEmail" value="support@logisco.com">
+            </div>
+            <div class="form-group">
+              <label>Tax Rate (%)</label>
+              <input type="number" id="taxRate" value="18" step="0.1">
+            </div>
+            <div class="form-group">
+              <label>Base Shipping Rate ($)</label>
+              <input type="number" id="baseRate" value="10" step="0.1">
+            </div>
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-save"></i> Save Settings
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal for updating shipment -->
+<div id="updateShipmentModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeUpdateModal()">&times;</span>
+    <h2>Update Shipment Status</h2>
+    <form id="updateShipmentForm">
+      <input type="hidden" id="updateShipmentId">
+      <div class="form-group">
+        <label>Status</label>
+        <select id="updateStatus" required>
+          <option value="PENDING">Pending</option>
+          <option value="PICKED_UP">Picked Up</option>
+          <option value="IN_TRANSIT">In Transit</option>
+          <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
+          <option value="DELIVERED">Delivered</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="updateLocation" required>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="updateDescription" required></textarea>
+      </div>
+      <button type="submit" class="btn-primary">Update Status</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
+

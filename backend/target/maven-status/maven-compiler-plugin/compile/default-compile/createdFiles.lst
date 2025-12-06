@@ -1,0 +1,4 @@
+com/logisco/service/SystemSettingsService.class
+com/logisco/repository/SystemSettingsRepository.class
+com/logisco/model/SystemSettings$SettingType.class
+com/logisco/model/SystemSettings.class

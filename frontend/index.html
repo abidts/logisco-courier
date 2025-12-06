@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logisco - Courier Tracking Service</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="container">
+    <div class="nav-brand">
+      <i class="fas fa-shipping-fast"></i>
+      <h1>Logisco</h1>
+    </div>
+    <ul class="nav-menu">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#track">Track</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="login.html">Login</a></li>
+      <li><a href="register.html" class="btn-primary">Sign Up</a></li>
+    </ul>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</nav>
+
+<section id="home" class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <h1>Fast & Reliable Courier Service</h1>
+      <p>Track your shipments in real-time with Logisco</p>
+      <a href="#track" class="btn-primary btn-large">Track Now</a>
+    </div>
+  </div>
+</section>
+
+<section id="track" class="tracking-section">
+  <div class="container">
+    <h2>Track Your Shipment</h2>
+    <div class="tracking-box">
+      <input type="text" id="trackingNumber" placeholder="Enter tracking number" />
+      <button onclick="trackShipment()" class="btn-primary">
+        <i class="fas fa-search"></i> Track
+      </button>
+    </div>
+
+    <div id="trackingResult" class="tracking-result hidden">
+      <div class="shipment-details">
+        <h3>Shipment Details</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Tracking Number:</label>
+            <span id="detailTrackingNumber"></span>
+          </div>
+          <div class="detail-item">
+            <label>Status:</label>
+            <span id="detailStatus" class="status-badge"></span>
+          </div>
+          <div class="detail-item">
+            <label>From:</label>
+            <span id="detailSender"></span>
+          </div>
+          <div class="detail-item">
+            <label>To:</label>
+            <span id="detailReceiver"></span>
+          </div>
+          <div class="detail-item">
+            <label>Estimated Delivery:</label>
+            <span id="detailEstimatedDelivery"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tracking-timeline">
+        <h3>Tracking History</h3>
+        <div id="trackingHistory" class="timeline">
+          <!-- Timeline items will be inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <div id="trackingError" class="error-message hidden">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>Shipment not found. Please check your tracking number.</p>
+    </div>
+  </div>
+</section>
+
+<section id="services" class="services-section">
+  <div class="container">
+    <h2>Our Services</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <i class="fas fa-truck"></i>
+        <h3>Domestic Shipping</h3>
+        <p>Fast and reliable delivery within the country</p>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-globe"></i>
+        <h3>International Shipping</h3>
+        <p>Worldwide delivery to over 200 countries</p>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-bolt"></i>
+        <h3>Express Delivery</h3>
+        <p>Same-day and overnight shipping options</p>
+      </div>
+      <div class="service-card">
+        <i class="fas fa-box"></i>
+        <h3>Package Insurance</h3>
+        <p>Protect your valuable shipments</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Logisco</h3>
+        <p>Your trusted courier partner</p>
+      </div>
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#track">Track</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="login.html">Login</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h4>Contact</h4>
+        <p><i class="fas fa-phone"></i> +1 234 567 890</p>
+        <p><i class="fas fa-envelope"></i> info@logisco.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 Logisco. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
+
