@@ -1,0 +1,626 @@
+{
+	"info": {
+		"_postman_id": "logisco-courier-api",
+		"name": "Logisco Courier API",
+		"description": "Complete API collection for Logisco Courier Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has userId\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('userId');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\",\n  \"email\": \"test@example.com\",\n  \"phoneNumber\": \"+1234567890\",\n  \"fullName\": \"Test User\",\n  \"role\": \"USER\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Save token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set(\"token\", jsonData.token);",
+									"        pm.collectionVariables.set(\"user_id\", jsonData.userId);",
+									"        pm.collectionVariables.set(\"username\", jsonData.username);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Shipments",
+			"item": [
+				{
+					"name": "Create Shipment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": {{user_id}},\n  \"senderName\": \"John Doe\",\n  \"senderPhone\": \"+1234567890\",\n  \"senderEmail\": \"john@example.com\",\n  \"senderAddress\": \"123 Main St, New York, NY 10001\",\n  \"receiverName\": \"Jane Smith\",\n  \"receiverPhone\": \"+0987654321\",\n  \"receiverEmail\": \"jane@example.com\",\n  \"receiverAddress\": \"456 Oak Ave, Los Angeles, CA 90001\",\n  \"packageDescription\": \"Electronics - Laptop\",\n  \"weight\": 3.5,\n  \"dimensions\": \"40x30x20\",\n  \"shipmentType\": \"DOMESTIC\",\n  \"priority\": \"EXPRESS\",\n  \"pickupDate\": \"2025-12-10T10:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Shipments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments/user/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"user",
+								"{{user_id}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Track Shipment (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/track/TRK123456789",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"track",
+								"TRK123456789"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Tracking History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments/1/history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"1",
+								"history"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Shipment Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"IN_TRANSIT\",\n  \"location\": \"Distribution Center - Chicago\",\n  \"description\": \"Package in transit to destination\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shipments/1/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"1",
+								"status"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Shipment",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/shipments/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shipments",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Invoices",
+			"item": [
+				{
+					"name": "Create Invoice",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/invoices/shipment/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"shipment",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Invoices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/invoices",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Invoice by Number",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/invoices/INV-2025-001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"INV-2025-001"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Invoice by Shipment",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/invoices/shipment/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"shipment",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Payment Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"PAID\",\n  \"method\": \"ONLINE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/invoices/1/payment",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"invoices",
+								"1",
+								"payment"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"newemail@example.com\",\n  \"phoneNumber\": \"+1234567890\",\n  \"fullName\": \"Updated Name\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/users/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"users",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Settings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"settings"
+							]
+						}
+					}
+				},
+				{
+					"name": "Create/Update Setting",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"settingKey\": \"MAINTENANCE_MODE\",\n  \"settingValue\": \"false\",\n  \"enabled\": true,\n  \"description\": \"Enable/disable maintenance mode\",\n  \"type\": \"BOOLEAN\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"settings"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Setting by Key",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/settings/MAINTENANCE_MODE",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"settings",
+								"MAINTENANCE_MODE"
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Setting",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/admin/settings/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"settings",
+								"1"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8090",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

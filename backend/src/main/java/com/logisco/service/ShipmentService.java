@@ -139,6 +139,22 @@ public class ShipmentService {
         return trackingHistoryRepository.findByShipmentIdOrderByTimestampDesc(shipmentId);
     }
 
+    public Shipment updateShipment(Long id, Shipment shipmentDetails) {
+        Shipment shipment = shipmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Shipment not found"));
+        
+        // Update fields
+        if (shipmentDetails.getAwbNumber() != null) {
+            shipment.setAwbNumber(shipmentDetails.getAwbNumber());
+        }
+        if (shipmentDetails.getStatus() != null) {
+            shipment.setStatus(shipmentDetails.getStatus());
+        }
+        shipment.setUpdatedAt(LocalDateTime.now());
+        
+        return shipmentRepository.save(shipment);
+    }
+
     public void deleteShipment(Long id) {
         shipmentRepository.deleteById(id);
     }

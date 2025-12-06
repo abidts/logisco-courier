@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Shipment - Logisco</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .booking-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+    .progress-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .progress-step::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: #ddd;
+      z-index: -1;
+    }
+    .progress-step:first-child::before {
+      display: none;
+    }
+    .progress-step.active::before {
+      background: #4CAF50;
+    }
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ddd;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-weight: bold;
+    }
+    .progress-step.active .step-number {
+      background: #4CAF50;
+    }
+    .progress-step.completed .step-number {
+      background: #4CAF50;
+    }
+    .step-content {
+      display: none;
+    }
+    .step-content.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .price-summary {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .price-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .price-total {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+      border-top: 2px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .courier-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .courier-card {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .courier-card:hover {
+      border-color: #4CAF50;
+    }
+    .courier-card.selected {
+      border-color: #4CAF50;
+      background: #f0f8f0;
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .success-message {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <i class="fas fa-shipping-fast"></i>
+        <h1>Logisco</h1>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="booking.html">Book Shipment</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="booking-container">
+    <h2>Book a Shipment</h2>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-step active" data-step="1">
+        <div class="step-number">1</div>
+        <div>Pickup Details</div>
+      </div>
+      <div class="progress-step" data-step="2">
+        <div class="step-number">2</div>
+        <div>Delivery Details</div>
+      </div>
+      <div class="progress-step" data-step="3">
+        <div class="step-number">3</div>
+        <div>Package Details</div>
+      </div>
+      <div class="progress-step" data-step="4">
+        <div class="step-number">4</div>
+        <div>Shipping Options</div>
+      </div>
+      <div class="progress-step" data-step="5">
+        <div class="step-number">5</div>
+        <div>Review & Pay</div>
+      </div>
+    </div>
+
+    <form id="bookingForm">
+      <!-- Step 1: Pickup Details -->
+      <div class="step-content active" id="step1">
+        <h3>Pickup Details</h3>
+        <div class="form-group">
+          <label>Sender Name *</label>
+          <input type="text" name="senderName" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sender Email *</label>
+            <input type="email" name="senderEmail" required>
+          </div>
+          <div class="form-group">
+            <label>Sender Phone *</label>
+            <input type="tel" name="senderPhone" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Pickup Address *</label>
+          <textarea name="senderAddress" rows="3" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City *</label>
+            <input type="text" name="senderCity" required>
+          </div>
+          <div class="form-group">
+            <label>State *</label>
+            <input type="text" name="senderState" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pincode *</label>
+            <input type="text" name="senderPincode" pattern="[0-9]{6}" required>
+            <small class="error-message" id="pickupPincodeError"></small>
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" name="senderCountry" value="India" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Preferred Pickup Date</label>
+            <input type="date" name="preferredPickupDate" min="">
+          </div>
+          <div class="form-group">
+            <label>Preferred Time Slot</label>
+            <select name="preferredPickupTimeSlot">
+              <option value="09:00-12:00">Morning (9:00 AM - 12:00 PM)</option>
+              <option value="12:00-15:00">Afternoon (12:00 PM - 3:00 PM)</option>
+              <option value="15:00-18:00">Evening (3:00 PM - 6:00 PM)</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+      </div>
+
+      <!-- Step 2: Delivery Details -->
+      <div class="step-content" id="step2">
+        <h3>Delivery Details</h3>
+        <div class="form-group">
+          <label>Receiver Name *</label>
+          <input type="text" name="receiverName" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Receiver Email</label>
+            <input type="email" name="receiverEmail">
+          </div>
+          <div class="form-group">
+            <label>Receiver Phone *</label>
+            <input type="tel" name="receiverPhone" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Delivery Address *</label>
+          <textarea name="receiverAddress" rows="3" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City *</label>
+            <input type="text" name="receiverCity" required>
+          </div>
+          <div class="form-group">
+            <label>State *</label>
+            <input type="text" name="receiverState" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pincode *</label>
+            <input type="text" name="receiverPincode" pattern="[0-9]{6}" required>
+            <small class="error-message" id="deliveryPincodeError"></small>
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <input type="text" name="receiverCountry" value="India" readonly>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Package Details -->
+      <div class="step-content" id="step3">
+        <h3>Package Details</h3>
+        <div class="form-group">
+          <label>Package Type *</label>
+          <select name="packageType" required>
+            <option value="DOCUMENT">Document</option>
+            <option value="PARCEL">Parcel</option>
+            <option value="FRAGILE">Fragile</option>
+            <option value="ELECTRONICS">Electronics</option>
+            <option value="FOOD">Food</option>
+            <option value="LIQUID">Liquid</option>
+            <option value="HAZARDOUS">Hazardous</option>
+            <option value="OTHERS">Others</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Package Description</label>
+          <textarea name="packageDescription" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Weight (kg) *</label>
+            <input type="number" name="weight" step="0.01" min="0.1" required>
+          </div>
+          <div class="form-group">
+            <label>Number of Packages</label>
+            <input type="number" name="numberOfPackages" min="1" value="1">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Length (cm)</label>
+            <input type="number" name="length" step="0.1" min="0">
+          </div>
+          <div class="form-group">
+            <label>Width (cm)</label>
+            <input type="number" name="width" step="0.1" min="0">
+          </div>
+          <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" name="height" step="0.1" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Declared Value (₹)</label>
+            <input type="number" name="declaredValue" step="0.01" min="0">
+          </div>
+          <div class="form-group">
+            <label>Insurance Required</label>
+            <select name="insuranceRequired">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Special Handling Instructions</label>
+          <textarea name="specialHandlingInstructions" rows="2"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Shipping Options -->
+      <div class="step-content" id="step4">
+        <h3>Shipping Options</h3>
+        <div class="form-group">
+          <label>Delivery Type *</label>
+          <select name="deliveryType" required onchange="calculatePrice()">
+            <option value="STANDARD">Standard (3-5 days)</option>
+            <option value="EXPRESS">Express (1-2 days)</option>
+            <option value="SAME_DAY">Same Day</option>
+            <option value="OVERNIGHT">Overnight</option>
+          </select>
+        </div>
+        
+        <div id="courierOptions" class="courier-options"></div>
+        
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="codEnabled" onchange="toggleCOD()"> 
+            Cash on Delivery (COD)
+          </label>
+          <div id="codAmountGroup" style="display: none; margin-top: 10px;">
+            <label>COD Amount (₹)</label>
+            <input type="number" name="codAmount" step="0.01" min="0" onchange="calculatePrice()">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notification Preferences</label>
+          <div>
+            <label><input type="checkbox" name="emailNotification" checked> Email</label>
+            <label style="margin-left: 20px;"><input type="checkbox" name="smsNotification" checked> SMS</label>
+            <label style="margin-left: 20px;"><input type="checkbox" name="whatsappNotification"> WhatsApp</label>
+          </div>
+        </div>
+
+        <div id="priceSummary" class="price-summary" style="display: none;">
+          <h4>Price Summary</h4>
+          <div class="price-item">
+            <span>Base Price:</span>
+            <span id="basePrice">₹0.00</span>
+          </div>
+          <div class="price-item">
+            <span>COD Charge:</span>
+            <span id="codCharge">₹0.00</span>
+          </div>
+          <div class="price-item">
+            <span>Insurance:</span>
+            <span id="insuranceCharge">₹0.00</span>
+          </div>
+          <div class="price-item">
+            <span>Fuel Surcharge:</span>
+            <span id="fuelSurcharge">₹0.00</span>
+          </div>
+          <div class="price-item">
+            <span>Service Tax:</span>
+            <span id="serviceTax">₹0.00</span>
+          </div>
+          <div class="price-total">
+            <span>Total:</span>
+            <span id="totalPrice">₹0.00</span>
+          </div>
+          <div style="margin-top: 10px; color: #666;">
+            <small>Estimated Delivery: <span id="estimatedDays">-</span> days</small>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Review & Pay -->
+      <div class="step-content" id="step5">
+        <h3>Review & Confirm</h3>
+        <div id="reviewSummary"></div>
+        <div class="price-summary">
+          <h4>Final Price</h4>
+          <div class="price-total">
+            <span>Total Amount:</span>
+            <span id="finalTotalPrice">₹0.00</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-secondary" onclick="prevStep()">Previous</button>
+          <button type="submit" class="btn btn-primary">Confirm & Book</button>
+        </div>
+      </div>
+    </form>
+
+    <div id="successMessage" class="success-message" style="display: none;"></div>
+  </div>
+
+  <script src="js/booking.js"></script>
+</body>
+</html>
+
