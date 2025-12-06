@@ -129,8 +129,11 @@ async function checkServiceability() {
                 deliveryPincode: deliveryPincode
             })
         });
-        
-        const data = await response.json();
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : null;
+        if (!response.ok) {
+            throw new Error((data && data.error) || 'Request failed');
+        }
         console.log('Serviceability:', data);
     } catch (error) {
         console.error('Error checking serviceability:', error);
@@ -186,8 +189,11 @@ async function calculatePrice() {
                 declaredValue: declaredValue
             })
         });
-        
-        const prices = await response.json();
+        const text = await response.text();
+        const prices = text ? JSON.parse(text) : null;
+        if (!response.ok) {
+            throw new Error((prices && prices.error) || 'Request failed');
+        }
         
         if (Array.isArray(prices)) {
             calculatedPrices = prices;
@@ -210,6 +216,11 @@ function displayCourierOptions(prices) {
     if (prices.length === 0) {
         container.innerHTML = '<p>No courier options available for this route.</p>';
         return;
+    }
+    if (prices.length === 1) {
+        // Auto-select the only available option
+        selectedCourierPartnerId = prices[0].courierPartnerId || null;
+        displayPriceSummary(prices[0]);
     }
     
     prices.forEach(price => {
@@ -313,11 +324,6 @@ function showReview() {
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    if (!selectedCourierPartnerId) {
-        alert('Please select a courier partner');
-        return;
-    }
-    
     const formData = new FormData(this);
     const data = {};
     
@@ -333,8 +339,10 @@ document.getElementById('bookingForm').addEventListener('submit', async function
         }
     }
     
-    // Add courier partner ID
-    data.courierPartnerId = selectedCourierPartnerId;
+    // Add courier partner ID if selected; otherwise omit (self-service)
+    if (selectedCourierPartnerId) {
+        data.courierPartnerId = selectedCourierPartnerId;
+    }
     
     // Add preferred pickup date if set
     if (data.preferredPickupDate) {
@@ -385,4 +393,3 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 // Auto-check serviceability when pincodes change
 document.querySelector('input[name="senderPincode"]').addEventListener('blur', checkServiceability);
 document.querySelector('input[name="receiverPincode"]').addEventListener('blur', checkServiceability);
-

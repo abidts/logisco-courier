@@ -26,6 +26,17 @@ public class ShipmentService {
         shipment.setCreatedAt(LocalDateTime.now());
         shipment.setUpdatedAt(LocalDateTime.now());
 
+        // Defaults to avoid null-based errors in pricing
+        if (shipment.getShipmentType() == null) {
+            shipment.setShipmentType(Shipment.ShipmentType.DOMESTIC);
+        }
+        if (shipment.getPriority() == null) {
+            shipment.setPriority(Shipment.Priority.STANDARD);
+        }
+        if (shipment.getWeight() != null && shipment.getWeight() < 0) {
+            shipment.setWeight(0.0);
+        }
+
         // Calculate price
         calculatePrice(shipment);
 
@@ -60,28 +71,32 @@ public class ShipmentService {
             basePrice += shipment.getWeight() * 2.5;
         }
 
-        // Calculate based on type
-        switch (shipment.getShipmentType()) {
-            case INTERNATIONAL:
-                basePrice *= 3;
-                break;
-            case EXPRESS:
-                basePrice *= 2;
-                break;
-            default:
-                break;
+        // Calculate based on type (null-safe)
+        if (shipment.getShipmentType() != null) {
+            switch (shipment.getShipmentType()) {
+                case INTERNATIONAL:
+                    basePrice *= 3;
+                    break;
+                case EXPRESS:
+                    basePrice *= 2;
+                    break;
+                default:
+                    break;
+            }
         }
 
-        // Calculate based on priority
-        switch (shipment.getPriority()) {
-            case OVERNIGHT:
-                basePrice *= 2.5;
-                break;
-            case EXPRESS:
-                basePrice *= 1.5;
-                break;
-            default:
-                break;
+        // Calculate based on priority (null-safe)
+        if (shipment.getPriority() != null) {
+            switch (shipment.getPriority()) {
+                case OVERNIGHT:
+                    basePrice *= 2.5;
+                    break;
+                case EXPRESS:
+                    basePrice *= 1.5;
+                    break;
+                default:
+                    break;
+            }
         }
 
         double tax = basePrice * 0.18; // 18% tax
@@ -159,4 +174,3 @@ public class ShipmentService {
         shipmentRepository.deleteById(id);
     }
 }
-

@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/dashboard.html")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/booking.html")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/admin.html")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/booking/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()

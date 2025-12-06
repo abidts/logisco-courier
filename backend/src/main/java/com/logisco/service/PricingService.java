@@ -181,6 +181,41 @@ public class PricingService {
         return prices;
     }
 
+    /**
+     * Fallback pricing when no courier partners are configured (self-service)
+     */
+    public Map<String, Object> calculateSelfPrice(Shipment shipment) {
+        Map<String, Object> result = new HashMap<>();
+
+        // Volumetric weight
+        Double volumetricWeight = calculateVolumetricWeight(
+                shipment.getLength(), shipment.getWidth(), shipment.getHeight());
+        shipment.setVolumetricWeight(volumetricWeight);
+
+        // Chargeable weight
+        Double chargeableWeight = getChargeableWeight(shipment.getWeight(), volumetricWeight);
+
+        // Base price similar to ShipmentService fallback
+        double basePrice = 10.0;
+        if (chargeableWeight != null) {
+            basePrice += chargeableWeight * 2.5;
+        }
+
+        // Simple tax (18%)
+        double serviceTax = basePrice * 0.18;
+        double totalPrice = basePrice + serviceTax;
+
+        result.put("basePrice", basePrice);
+        result.put("fuelSurcharge", 0.0);
+        result.put("serviceTax", serviceTax);
+        result.put("totalPrice", totalPrice);
+        result.put("chargeableWeight", chargeableWeight);
+        result.put("volumetricWeight", volumetricWeight);
+        result.put("courierPartner", "Self");
+        result.put("estimatedDays", calculateEstimatedDays(shipment.getDeliveryType(), shipment.getDistance()));
+        return result;
+    }
+
     private Map<String, Object> calculateDefaultPrice(CourierPartner partner, Shipment shipment, Double chargeableWeight) {
         Map<String, Object> result = new HashMap<>();
         
@@ -262,4 +297,3 @@ public class PricingService {
         }
     }
 }
-

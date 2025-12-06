@@ -106,8 +106,12 @@ public class BookingController {
                 Map<String, Object> price = pricingService.calculatePrice(shipment, courierPartnerId);
                 return ResponseEntity.ok(price);
             } else {
-                // Calculate for all partners
-                return ResponseEntity.ok(pricingService.calculatePricesForAllPartners(shipment));
+                // Calculate for all partners; if none, fallback to self pricing
+                var prices = pricingService.calculatePricesForAllPartners(shipment);
+                if (prices.isEmpty()) {
+                    return ResponseEntity.ok(pricingService.calculateSelfPrice(shipment));
+                }
+                return ResponseEntity.ok(prices);
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest()
@@ -190,12 +194,20 @@ public class BookingController {
             shipment.setDistance(distance);
 
             // Courier partner
-            Long courierPartnerId = Long.parseLong(request.get("courierPartnerId").toString());
-            shipment.setCourierPartner(new com.logisco.model.CourierPartner());
-            shipment.getCourierPartner().setId(courierPartnerId);
+            Long courierPartnerId = null;
+            if (request.get("courierPartnerId") != null) {
+                courierPartnerId = Long.parseLong(request.get("courierPartnerId").toString());
+                shipment.setCourierPartner(new com.logisco.model.CourierPartner());
+                shipment.getCourierPartner().setId(courierPartnerId);
+            }
 
             // Calculate price
-            Map<String, Object> price = pricingService.calculatePrice(shipment, courierPartnerId);
+            Map<String, Object> price;
+            if (courierPartnerId != null) {
+                price = pricingService.calculatePrice(shipment, courierPartnerId);
+            } else {
+                price = pricingService.calculateSelfPrice(shipment);
+            }
             shipment.setBasePrice(((Number) price.get("basePrice")).doubleValue());
             shipment.setTax(((Number) price.get("serviceTax")).doubleValue());
             shipment.setTotalPrice(((Number) price.get("totalPrice")).doubleValue());
@@ -257,4 +269,3 @@ public class BookingController {
         return "AWB" + System.currentTimeMillis() + shipment.getId();
     }
 }
-
