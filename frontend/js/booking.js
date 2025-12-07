@@ -1,4 +1,6 @@
 // Booking form JavaScript
+const API_URL = 'http://localhost:8080/api';
+const PINCODE_API = 'https://api.postalpincode.in/pincode/';
 let currentStep = 1;
 const totalSteps = 5;
 let selectedCourierPartnerId = null;
@@ -9,6 +11,37 @@ let bookingData = {};
 document.addEventListener('DOMContentLoaded', function() {
     const today = new Date().toISOString().split('T')[0];
     document.querySelector('input[name="preferredPickupDate"]').setAttribute('min', today);
+
+    const originInput = document.getElementById('originPincode');
+    const destInput = document.getElementById('destPincode');
+    const startBtn = document.getElementById('routeStart');
+    if (originInput) {
+        originInput.addEventListener('input', () => {
+            const v = originInput.value.replace(/[^0-9]/g, '');
+            originInput.value = v;
+            if (v.length === 6) lookupAndShowPincode(v, 'origin');
+        });
+        originInput.addEventListener('blur', () => {
+            const v = originInput.value;
+            if (v && v.length === 6) lookupAndShowPincode(v, 'origin');
+        });
+    }
+    if (destInput) {
+        destInput.addEventListener('input', () => {
+            const v = destInput.value.replace(/[^0-9]/g, '');
+            destInput.value = v;
+            if (v.length === 6) lookupAndShowPincode(v, 'dest');
+        });
+        destInput.addEventListener('blur', () => {
+            const v = destInput.value;
+            if (v && v.length === 6) lookupAndShowPincode(v, 'dest');
+        });
+    }
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            document.getElementById('step1').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 });
 
 function nextStep() {
@@ -119,7 +152,7 @@ async function checkServiceability() {
     }
     
     try {
-        const response = await fetch('http://localhost:8090/api/booking/check-serviceability', {
+        const response = await fetch(`${API_URL}/booking/check-serviceability`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -137,6 +170,51 @@ async function checkServiceability() {
         console.log('Serviceability:', data);
     } catch (error) {
         console.error('Error checking serviceability:', error);
+    }
+}
+
+async function lookupPincode(pincode) {
+    try {
+        const res = await fetch(PINCODE_API + encodeURIComponent(pincode));
+        const data = await res.json();
+        if (Array.isArray(data) && data[0] && data[0].Status === 'Success' && Array.isArray(data[0].PostOffice) && data[0].PostOffice[0]) {
+            const po = data[0].PostOffice[0];
+            return { district: po.District, state: po.State, city: po.Name };
+        }
+        return null;
+    } catch (e) {
+        return null;
+    }
+}
+
+async function lookupAndShowPincode(pincode, type) {
+    const statusEl = document.getElementById(type === 'origin' ? 'originPincodeStatus' : 'destPincodeStatus');
+    statusEl.textContent = '';
+    statusEl.classList.remove('invalid');
+    const info = await lookupPincode(pincode);
+    if (info) {
+        statusEl.textContent = `${(info.district || info.city || '').toUpperCase()} - ${info.state.toUpperCase()} ✓`;
+        // Autofill corresponding form fields
+        if (type === 'origin') {
+            const pinField = document.querySelector('input[name="senderPincode"]');
+            const cityField = document.querySelector('input[name="senderCity"]');
+            const stateField = document.querySelector('input[name="senderState"]');
+            if (pinField) pinField.value = pincode;
+            if (cityField) cityField.value = info.district || info.city || '';
+            if (stateField) stateField.value = info.state || '';
+            checkServiceability();
+        } else {
+            const pinField = document.querySelector('input[name="receiverPincode"]');
+            const cityField = document.querySelector('input[name="receiverCity"]');
+            const stateField = document.querySelector('input[name="receiverState"]');
+            if (pinField) pinField.value = pincode;
+            if (cityField) cityField.value = info.district || info.city || '';
+            if (stateField) stateField.value = info.state || '';
+            checkServiceability();
+        }
+    } else {
+        statusEl.textContent = 'Invalid pincode';
+        statusEl.classList.add('invalid');
     }
 }
 
@@ -169,7 +247,7 @@ async function calculatePrice() {
     }
     
     try {
-        const response = await fetch('http://localhost:8090/api/booking/calculate-price', {
+        const response = await fetch(`${API_URL}/booking/calculate-price`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -323,6 +401,11 @@ function showReview() {
 // Handle form submission
 document.getElementById('bookingForm').addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    if (!localStorage.getItem('userId')) {
+        openOtpModal();
+        return;
+    }
     
     const formData = new FormData(this);
     const data = {};
@@ -339,6 +422,11 @@ document.getElementById('bookingForm').addEventListener('submit', async function
         }
     }
     
+    // Add userId if verified
+    if (localStorage.getItem('userId')) {
+        data.userId = parseInt(localStorage.getItem('userId'), 10);
+    }
+
     // Add courier partner ID if selected; otherwise omit (self-service)
     if (selectedCourierPartnerId) {
         data.courierPartnerId = selectedCourierPartnerId;
@@ -350,7 +438,7 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     }
     
     try {
-        const response = await fetch('http://localhost:8090/api/booking/create', {
+        const response = await fetch(`${API_URL}/booking/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -393,3 +481,95 @@ document.getElementById('bookingForm').addEventListener('submit', async function
 // Auto-check serviceability when pincodes change
 document.querySelector('input[name="senderPincode"]').addEventListener('blur', checkServiceability);
 document.querySelector('input[name="receiverPincode"]').addEventListener('blur', checkServiceability);
+
+document.querySelector('input[name="senderPincode"]').addEventListener('blur', async (e) => {
+    const v = e.target.value;
+    if (v && v.length === 6) {
+        const info = await lookupPincode(v);
+        if (info) {
+            const cityField = document.querySelector('input[name="senderCity"]');
+            const stateField = document.querySelector('input[name="senderState"]');
+            if (cityField && !cityField.value) cityField.value = info.district || info.city || '';
+            if (stateField && !stateField.value) stateField.value = info.state || '';
+        }
+    }
+});
+
+document.querySelector('input[name="receiverPincode"]').addEventListener('blur', async (e) => {
+    const v = e.target.value;
+    if (v && v.length === 6) {
+        const info = await lookupPincode(v);
+        if (info) {
+            const cityField = document.querySelector('input[name="receiverCity"]');
+            const stateField = document.querySelector('input[name="receiverState"]');
+            if (cityField && !cityField.value) cityField.value = info.district || info.city || '';
+            if (stateField && !stateField.value) stateField.value = info.state || '';
+        }
+    }
+});
+function openOtpModal() {
+    const modal = document.getElementById('otpModal');
+    modal.style.display = 'flex';
+}
+
+function closeOtpModal() {
+    const modal = document.getElementById('otpModal');
+    modal.style.display = 'none';
+}
+
+async function requestOtp() {
+    const phone = document.getElementById('otpPhone').value.replace(/[^0-9]/g, '');
+    const name = document.getElementById('otpFullName').value.trim();
+    const msg = document.getElementById('otpMessage');
+    msg.textContent = '';
+    if (!phone || phone.length !== 10) {
+        msg.textContent = 'Enter a valid 10-digit mobile number';
+        return;
+    }
+    try {
+        const res = await fetch(`${API_URL}/auth/request-otp`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, fullName: name })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to request OTP');
+        document.getElementById('otpVerify').disabled = false;
+        msg.textContent = 'OTP sent to your mobile number';
+        msg.style.color = '#0a8f4c';
+    } catch (err) {
+        msg.textContent = err.message;
+        msg.style.color = '#dc3545';
+    }
+}
+
+async function verifyOtp() {
+    const phone = document.getElementById('otpPhone').value.replace(/[^0-9]/g, '');
+    const code = document.getElementById('otpCode').value.replace(/[^0-9]/g, '');
+    const name = document.getElementById('otpFullName').value.trim();
+    const msg = document.getElementById('otpMessage');
+    msg.textContent = '';
+    if (!code || code.length !== 6) {
+        msg.textContent = 'Enter the 6-digit OTP';
+        return;
+    }
+    try {
+        const res = await fetch(`${API_URL}/auth/verify-otp`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, otp: code, fullName: name })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Invalid OTP');
+        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('authToken', data.token);
+        closeOtpModal();
+        // Retry submit
+        document.getElementById('bookingForm').dispatchEvent(new Event('submit'));
+    } catch (err) {
+        msg.textContent = err.message;
+        msg.style.color = '#dc3545';
+    }
+}
+
+document.getElementById('otpRequest')?.addEventListener('click', requestOtp);
+document.getElementById('otpVerify')?.addEventListener('click', verifyOtp);
+document.getElementById('otpClose')?.addEventListener('click', closeOtpModal);

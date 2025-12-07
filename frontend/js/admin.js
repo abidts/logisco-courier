@@ -2,6 +2,8 @@ const API_URL = 'http://localhost:8080/api';
 let allShipments = [];
 let allUsers = [];
 let allInvoices = [];
+let shipmentStatusFilter = '';
+let shipmentSearchQuery = '';
 
 // Check admin authentication
 function checkAdminAuth() {
@@ -46,7 +48,7 @@ async function loadAllShipments() {
 
         if (response.ok) {
             allShipments = await response.json();
-            displayAdminShipments();
+            adminFilterShipments();
         }
     } catch (error) {
         console.error('Error loading shipments:', error);
@@ -101,8 +103,9 @@ function updateAdminStats() {
     document.getElementById('adminTotalRevenue').textContent = `$${revenue.toFixed(2)}`;
 }
 
-function displayAdminShipments() {
+function displayAdminShipments(displayList = null) {
     const container = document.getElementById('adminShipmentsList');
+    const list = Array.isArray(displayList) ? displayList : allShipments;
 
     const table = `
         <table>
@@ -118,7 +121,7 @@ function displayAdminShipments() {
                 </tr>
             </thead>
             <tbody>
-                ${allShipments.map(shipment => `
+                ${list.map(shipment => `
                     <tr>
                         <td>${shipment.trackingNumber}</td>
                         <td>${shipment.senderName}</td>
@@ -138,6 +141,37 @@ function displayAdminShipments() {
 
     container.innerHTML = table;
 }
+
+function adminFilterShipments() {
+    const statusEl = document.getElementById('adminStatusFilter');
+    shipmentStatusFilter = statusEl ? statusEl.value : '';
+
+    const searchEl = document.getElementById('adminSearch');
+    shipmentSearchQuery = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+    let filtered = allShipments;
+
+    if (shipmentStatusFilter) {
+        filtered = filtered.filter(s => s.status === shipmentStatusFilter);
+    }
+
+    if (shipmentSearchQuery) {
+        filtered = filtered.filter(s =>
+            (s.trackingNumber || '').toLowerCase().includes(shipmentSearchQuery) ||
+            (s.senderName || '').toLowerCase().includes(shipmentSearchQuery) ||
+            (s.receiverName || '').toLowerCase().includes(shipmentSearchQuery)
+        );
+    }
+
+    displayAdminShipments(filtered);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const searchEl = document.getElementById('adminSearch');
+    if (searchEl) {
+        searchEl.addEventListener('input', adminFilterShipments);
+    }
+});
 
 function displayAdminUsers() {
     const container = document.getElementById('adminUsersList');

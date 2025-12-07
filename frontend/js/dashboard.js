@@ -136,6 +136,7 @@ document.getElementById('shipmentForm')?.addEventListener('submit', async (e) =>
     e.preventDefault();
 
     const formData = new FormData(e.target);
+    const pickupDateRaw = formData.get('pickupDate');
     const shipmentData = {
         user: { id: localStorage.getItem('userId') },
         senderName: formData.get('senderName'),
@@ -151,7 +152,7 @@ document.getElementById('shipmentForm')?.addEventListener('submit', async (e) =>
         dimensions: formData.get('dimensions'),
         shipmentType: formData.get('shipmentType'),
         priority: formData.get('priority'),
-        pickupDate: formData.get('pickupDate')
+        pickupDate: pickupDateRaw ? new Date(pickupDateRaw).toISOString() : null
     };
 
     try {

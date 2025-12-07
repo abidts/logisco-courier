@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/admin.html")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/booking/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/admin/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/ws-chat/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/shipments/*/history")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/css/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/js/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/admin/**")).hasRole("ADMIN")

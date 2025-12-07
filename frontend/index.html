@@ -6,6 +6,18 @@
   <title>Logisco - Courier Tracking Service</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9o9o=" crossorigin="" />
+  <style>
+    .chat-toggle { position: fixed; right: 20px; bottom: 20px; z-index: 2000; }
+    .chat-panel { position: fixed; right: 20px; bottom: 80px; width: 320px; background: #fff; border-radius: 10px; box-shadow: var(--shadow); display: none; }
+    .chat-panel.open { display: block; }
+    .chat-header { padding: 10px 12px; background: var(--primary-color); color: #fff; border-radius: 10px 10px 0 0; }
+    .chat-body { max-height: 260px; overflow-y: auto; padding: 10px; }
+    .chat-footer { display: flex; gap: 8px; padding: 10px; }
+    .chat-footer input { flex: 1; padding: 10px; border: 2px solid var(--light-color); border-radius: 6px; }
+    .chat-message { margin-bottom: 8px; font-size: 0.95rem; }
+    .chat-time { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
+  </style>
 </head>
 <body>
 <nav class="navbar">
@@ -90,6 +102,8 @@
           <!-- Timeline items will be inserted here -->
         </div>
       </div>
+
+      <div id="trackingMap" class="tracking-map"></div>
     </div>
 
     <div id="trackingError" class="error-message hidden">
@@ -161,7 +175,20 @@
   </div>
 </footer>
 
+<button id="chatToggle" class="btn-primary chat-toggle"><i class="fas fa-comments"></i> Chat</button>
+<div id="chatPanel" class="chat-panel">
+  <div class="chat-header"><i class="fas fa-headset"></i> Live Support</div>
+  <div id="chatMessages" class="chat-body"></div>
+  <div class="chat-footer">
+    <input id="chatInput" type="text" placeholder="Type a message..." />
+    <button id="chatSend" class="btn-primary">Send</button>
+  </div>
+  </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nYpH6DvD+F7v+6HhyEVDnE4yWZ2jAoZrE+bxd0f4M=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script src="js/main.js"></script>
+<script src="js/chat.js"></script>
 </body>
 </html>
-

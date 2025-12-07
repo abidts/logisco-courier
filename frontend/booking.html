@@ -157,6 +157,18 @@
       border-radius: 4px;
       margin-bottom: 20px;
     }
+    .route-box { background: #fff; border: 2px solid #0f355d; border-radius: 20px; padding: 20px; margin-bottom: 24px; }
+    .route-tabs { display: flex; gap: 30px; margin-bottom: 16px; align-items: center; }
+    .route-tab { background: transparent; border: none; font-weight: 700; font-size: 18px; color: #0f355d; padding: 10px 18px; border-radius: 24px; cursor: pointer; }
+    .route-tab.active { background: #0f355d; color: #fff; }
+    .route-row { display: grid; grid-template-columns: 20px 1fr; gap: 12px; align-items: center; margin: 14px 0; }
+    .route-dot { width: 12px; height: 12px; background: #0a8f4c; border-radius: 50%; }
+    .pincode-input-wrapper { display: flex; align-items: center; gap: 12px; border: 2px solid #0f355d; border-radius: 24px; padding: 12px 16px; }
+    .pincode-input-wrapper i { color: #6c757d; }
+    .pincode-input-wrapper input { border: none; outline: none; flex: 1; font-size: 18px; }
+    .pincode-status { font-weight: 700; color: #0a8f4c; }
+    .pincode-status.invalid { color: #dc3545; }
+    .route-actions { display: flex; justify-content: center; margin-top: 16px; }
   </style>
 </head>
 <body>
@@ -177,6 +189,37 @@
 
   <div class="booking-container">
     <h2>Book a Shipment</h2>
+    <div class="route-box" id="routeBox">
+      <div class="route-tabs">
+        <button class="route-tab active" id="tabDomestic">Domestic</button>
+        <button class="route-tab" id="tabInternational">International</button>
+      </div>
+      <div class="route-row">
+        <div class="route-dot"></div>
+        <div class="route-field">
+          <label>Origin / Shipper Pincode *</label>
+          <div class="pincode-input-wrapper">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" id="originPincode" maxlength="6" placeholder="Enter 6-digit pincode" />
+            <span id="originPincodeStatus" class="pincode-status"></span>
+          </div>
+        </div>
+      </div>
+      <div class="route-row">
+        <div class="route-dot"></div>
+        <div class="route-field">
+          <label>Destination / Consignee Pincode *</label>
+          <div class="pincode-input-wrapper">
+            <i class="fas fa-map-marker-alt"></i>
+            <input type="text" id="destPincode" maxlength="6" placeholder="Enter 6-digit pincode" />
+            <span id="destPincodeStatus" class="pincode-status"></span>
+          </div>
+        </div>
+      </div>
+      <div class="route-actions">
+        <button type="button" class="btn btn-primary" id="routeStart">Ship Now</button>
+      </div>
+    </div>
     
     <!-- Progress Bar -->
     <div class="progress-bar">
@@ -470,7 +513,47 @@
     <div id="successMessage" class="success-message" style="display: none;"></div>
   </div>
 
+  <div id="otpModal" class="otp-modal">
+    <div class="otp-dialog">
+      <div class="otp-header">Create an account</div>
+      <div class="otp-body">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="otpFullName" placeholder="Full Name">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <div class="phone-input">
+            <span class="country-code">+91</span>
+            <input type="tel" id="otpPhone" maxlength="10" placeholder="Enter 10-digit mobile">
+            <button type="button" id="otpRequest" class="btn btn-secondary">Generate OTP</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Enter 6 digit OTP</label>
+          <div class="otp-input">
+            <input type="text" id="otpCode" maxlength="6" placeholder="123456">
+            <button type="button" id="otpVerify" class="btn btn-primary" disabled>Sign Up</button>
+          </div>
+          <small id="otpMessage" class="error-message"></small>
+        </div>
+      </div>
+      <div class="otp-footer">
+        <button type="button" id="otpClose" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/booking.js"></script>
+  <style>
+    .otp-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 3000; }
+    .otp-dialog { width: 420px; max-width: 90vw; background: #fff; border-radius: 16px; box-shadow: var(--shadow); }
+    .otp-header { padding: 16px 20px; font-weight: 700; font-size: 18px; color: #0f355d; border-bottom: 1px solid #eee; }
+    .otp-body { padding: 16px 20px; }
+    .otp-footer { padding: 12px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #eee; }
+    .phone-input { display: flex; align-items: center; gap: 10px; }
+    .country-code { background: #f1f1f1; padding: 10px 12px; border-radius: 8px; }
+    .otp-input { display: flex; gap: 10px; align-items: center; }
+  </style>
 </body>
 </html>
-

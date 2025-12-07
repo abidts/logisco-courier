@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/booking")
@@ -139,8 +143,10 @@ public class BookingController {
             shipment.setSenderPincode(request.get("senderPincode").toString());
             
             if (request.get("preferredPickupDate") != null) {
-                shipment.setPreferredPickupDate(java.time.LocalDateTime.parse(
-                    request.get("preferredPickupDate").toString()));
+                LocalDateTime dt = parseDateTime(request.get("preferredPickupDate").toString());
+                if (dt != null) {
+                    shipment.setPreferredPickupDate(dt);
+                }
             }
             if (request.get("preferredPickupTimeSlot") != null) {
                 shipment.setPreferredPickupTimeSlot(request.get("preferredPickupTimeSlot").toString());
@@ -227,6 +233,16 @@ public class BookingController {
             shipment.setWhatsappNotification(request.get("whatsappNotification") != null && 
                 Boolean.parseBoolean(request.get("whatsappNotification").toString()));
 
+            // Link user if provided
+            if (request.get("userId") != null) {
+                try {
+                    Long uid = Long.parseLong(request.get("userId").toString());
+                    com.logisco.model.User user = new com.logisco.model.User();
+                    user.setId(uid);
+                    shipment.setUser(user);
+                } catch (Exception ignored) {}
+            }
+
             // Generate booking ID and tracking number
             String bookingId = "BK" + System.currentTimeMillis();
             String trackingNumber = "TRK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -267,5 +283,21 @@ public class BookingController {
     private String generateAWB(Shipment shipment) {
         // In production, this would call the courier partner's API to generate AWB
         return "AWB" + System.currentTimeMillis() + shipment.getId();
+    }
+
+    private LocalDateTime parseDateTime(String value) {
+        try {
+            return OffsetDateTime.parse(value).toLocalDateTime();
+        } catch (Exception ignored) {}
+        try {
+            return LocalDateTime.parse(value);
+        } catch (Exception ignored) {}
+        try {
+            return LocalDate.parse(value).atStartOfDay();
+        } catch (Exception ignored) {}
+        try {
+            return LocalDateTime.parse(value, DateTimeFormatter.ISO_DATE_TIME);
+        } catch (Exception ignored) {}
+        return null;
     }
 }

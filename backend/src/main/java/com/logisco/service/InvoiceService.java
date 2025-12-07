@@ -6,6 +6,10 @@ import com.logisco.repository.InvoiceRepository;
 import com.logisco.repository.ShipmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -77,5 +81,39 @@ public class InvoiceService {
 
         return invoiceRepository.save(invoice);
     }
-}
 
+    public byte[] generateInvoicePdf(String invoiceNumber) {
+        Invoice invoice = findByInvoiceNumber(invoiceNumber)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+        Document document = new Document();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            PdfWriter.getInstance(document, baos);
+            document.open();
+            document.add(new Paragraph("Invoice"));
+            document.add(new Paragraph("Invoice Number: " + invoice.getInvoiceNumber()));
+            document.add(new Paragraph("Issued Date: " + invoice.getIssuedDate()));
+            document.add(new Paragraph("Due Date: " + invoice.getDueDate()));
+            if (invoice.getShipment() != null) {
+                Shipment s = invoice.getShipment();
+                document.add(new Paragraph("Shipment Tracking: " + s.getTrackingNumber()));
+                document.add(new Paragraph("Receiver: " + s.getReceiverName()));
+                document.add(new Paragraph("Sender: " + s.getSenderName()));
+            }
+            document.add(new Paragraph("Subtotal: " + formatAmount(invoice.getSubtotal())));
+            document.add(new Paragraph("Tax: " + formatAmount(invoice.getTaxAmount())));
+            document.add(new Paragraph("Discount: " + formatAmount(invoice.getDiscount())));
+            document.add(new Paragraph("Total: " + formatAmount(invoice.getTotalAmount())));
+            document.add(new Paragraph("Payment Status: " + invoice.getPaymentStatus()));
+            document.close();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate invoice PDF");
+        }
+    }
+
+    private String formatAmount(Double amount) {
+        if (amount == null) return "0.00";
+        return String.format("%.2f", amount);
+    }
+}

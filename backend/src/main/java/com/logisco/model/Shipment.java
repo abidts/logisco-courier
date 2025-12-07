@@ -1,6 +1,7 @@
 package com.logisco.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class Shipment {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     // Pickup Details
@@ -87,6 +89,7 @@ public class Shipment {
     // Courier Partner
     @ManyToOne
     @JoinColumn(name = "courier_partner_id")
+    @JsonIgnore
     private CourierPartner courierPartner;
     
     private String awbNumber; // Airway Bill Number from courier partner
@@ -110,6 +113,7 @@ public class Shipment {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<TrackingHistory> trackingHistory = new ArrayList<>();
 
     public enum ShipmentType {
@@ -133,4 +137,3 @@ public class Shipment {
         DOCUMENT, PARCEL, FRAGILE, ELECTRONICS, FOOD, LIQUID, HAZARDOUS, OTHERS
     }
 }
-

@@ -6,6 +6,17 @@
   <title>Admin Panel - Logisco</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .chat-toggle { position: fixed; right: 20px; bottom: 20px; z-index: 2000; }
+    .chat-panel { position: fixed; right: 20px; bottom: 80px; width: 320px; background: #fff; border-radius: 10px; box-shadow: var(--shadow); display: none; }
+    .chat-panel.open { display: block; }
+    .chat-header { padding: 10px 12px; background: var(--primary-color); color: #fff; border-radius: 10px 10px 0 0; }
+    .chat-body { max-height: 260px; overflow-y: auto; padding: 10px; }
+    .chat-footer { display: flex; gap: 8px; padding: 10px; }
+    .chat-footer input { flex: 1; padding: 10px; border: 2px solid var(--light-color); border-radius: 6px; }
+    .chat-message { margin-bottom: 8px; font-size: 0.95rem; }
+    .chat-time { color: var(--gray); font-size: 0.8rem; margin-left: 8px; }
+  </style>
 </head>
 <body>
 <div class="dashboard-container">
@@ -91,7 +102,8 @@
       <div id="admin-shipments" class="page-section">
         <div class="page-header">
           <h2>All Shipments</h2>
-          <div class="filters">
+          <div class="admin-toolbar">
+            <input type="text" id="adminSearch" placeholder="Search by tracking, sender or receiver" />
             <select id="adminStatusFilter" onchange="adminFilterShipments()">
               <option value="">All Status</option>
               <option value="PENDING">Pending</option>
@@ -99,6 +111,7 @@
               <option value="IN_TRANSIT">In Transit</option>
               <option value="OUT_FOR_DELIVERY">Out for Delivery</option>
               <option value="DELIVERED">Delivered</option>
+              <option value="CANCELLED">Cancelled</option>
             </select>
           </div>
         </div>
@@ -112,10 +125,10 @@
       <div id="admin-users" class="page-section">
         <div class="page-header">
           <h2>Users Management</h2>
-          <button class="btn-primary" onclick="showAddUserModal()">
-            <i class="fas fa-user-plus"></i> Add User
-          </button>
-        </div>
+            <button class="btn-primary" onclick="showAddUserModal()">
+              <i class="fas fa-user-plus"></i> Add User
+            </button>
+          </div>
 
         <div id="adminUsersList" class="admin-table">
           <!-- Users table will be loaded here -->
@@ -244,7 +257,19 @@
   </div>
 </div>
 
+<button id="chatToggle" class="btn-primary chat-toggle"><i class="fas fa-comments"></i> Chat</button>
+<div id="chatPanel" class="chat-panel">
+  <div class="chat-header"><i class="fas fa-headset"></i> Live Support</div>
+  <div id="chatMessages" class="chat-body"></div>
+  <div class="chat-footer">
+    <input id="chatInput" type="text" placeholder="Type a message..." />
+    <button id="chatSend" class="btn-primary">Send</button>
+  </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script src="js/admin.js"></script>
+<script src="js/chat.js"></script>
 </body>
 </html>
-

@@ -8,6 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import java.io.ByteArrayOutputStream;
 
 @RestController
 @RequestMapping("/api")
@@ -45,6 +50,20 @@ public class ShipmentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/track/{trackingNumber}/qr")
+    public ResponseEntity<byte[]> getTrackingQr(@PathVariable String trackingNumber) {
+        try {
+            String url = "http://localhost:8090/api/track/" + trackingNumber;
+            QRCodeWriter writer = new QRCodeWriter();
+            BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, 256, 256);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(matrix, "PNG", baos);
+            return ResponseEntity.ok(baos.toByteArray());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/shipments/{id}/history")
     public ResponseEntity<List<TrackingHistory>> getTrackingHistory(@PathVariable Long id) {
         return ResponseEntity.ok(shipmentService.getTrackingHistory(id));
@@ -75,4 +94,3 @@ public class ShipmentController {
         return ResponseEntity.ok(Map.of("message", "Shipment deleted successfully"));
     }
 }
-
