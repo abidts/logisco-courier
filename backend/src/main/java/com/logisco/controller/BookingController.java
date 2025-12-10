@@ -245,9 +245,7 @@ public class BookingController {
 
             // Generate booking ID and tracking number
             String bookingId = "BK" + System.currentTimeMillis();
-            String trackingNumber = "TRK" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
             shipment.setBookingId(bookingId);
-            shipment.setTrackingNumber(trackingNumber);
             shipment.setStatus(Shipment.ShipmentStatus.PENDING);
 
             // Set user (would get from authentication context in production)
@@ -264,7 +262,7 @@ public class BookingController {
 
             return ResponseEntity.ok(Map.of(
                 "bookingId", bookingId,
-                "trackingNumber", trackingNumber,
+                "trackingNumber", savedShipment.getTrackingNumber(),
                 "awbNumber", awbNumber,
                 "shipmentId", savedShipment.getId(),
                 "totalPrice", savedShipment.getTotalPrice(),
